@@ -1,0 +1,457 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>kalman_filter</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-04-15"><meta name="DC.source" content="kalman_filter.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="comment">% initializing state vector</span>
+x0=-9.764;<span class="comment">% simultaneous solving for two equations</span>
+y0=-9.764;
+vx0=0; <span class="comment">% asuming velocity to be zero at the start</span>
+vy0=0;
+
+Lb1 = [9.72; 9.72; 22.08; 22.08];
+Lb2 = [8.77;8.77;20.74;20.74];
+Lb3 = [7.97;7.97;19.42;19.42];
+Lb4 = [7.34;7.34;18.10;18.10];
+Lb5 = [6.93;6.93;16.81;16.81];
+Lb6 = [6.79;6.79;15.53;15.53];
+Lb7 = [6.93;6.93;14.28;14.28];
+Lb8 = [7.34;7.34;13.06;13.06];
+Lb9 = [7.97;7.97;11.88;11.88];
+Lb10 = [8.77;8.77;10.76;10.76];
+Lb11 = [9.72;9.72;9.72;9.72];
+Lb12 = [10.76;10.76;8.77;8.77];
+Lb13 = [11.88;11.88;7.97;7.97];
+Lb14 = [13.06;13.06;7.43;7.34];
+Lb15 = [14.28;14.28;6.93;6.93];
+Lb16 = [15.53;15.53;6.79;6.79];
+Lb17 = [16.81;16.81;6.93;6.93];
+Lb18 = [18.10;18.10;7.34;7.43];
+Lb19 = [19.42;19.42;7.97;7.97];
+Lb20 = [20.74;20.74;8.77;8.77];
+Lb21 = [22.08;22.08;9.72;9.72];
+
+<span class="comment">% Define observation matrices in a cell array</span>
+Lb_cell = {Lb1, Lb2, Lb3, Lb4, Lb5, Lb6, Lb7, Lb8, Lb9, Lb10, Lb11, Lb12, Lb13, Lb14, Lb15, Lb16, Lb17, Lb18, Lb19, Lb20, Lb21};
+
+<span class="comment">% Initializing covariance matrices</span>
+Pk_1 = diag([1,1,1,1]); <span class="comment">% Covariance of the process noise</span>
+Qk_1 = diag([0.001,0.001,0.001,0.001]); <span class="comment">% Covariance of the state estimate</span>
+Rk_1 = diag([1, 1, 1, 1]); <span class="comment">% Covariance of the observation noise</span>
+
+<span class="comment">% Initialize lists to store final coordinates</span>
+x_list = [];
+y_list = [];
+trace_P=[];
+
+<span class="keyword">for</span> i=1:21
+
+    <span class="comment">% define state vector</span>
+    Xk_1=[x0;y0;vx0;vy0];
+
+    <span class="comment">% define Measurement model</span>
+    Zk=Lb_cell{i};
+
+    <span class="comment">% define time step</span>
+    dt=1;
+
+    <span class="comment">% define Fk matrix</span>
+    Fk=[1 0 dt 0;
+        0 1 0 dt;
+        0 0 1 0;
+        0 0 0 1];
+
+    <span class="comment">% Kalman filter</span>
+    <span class="comment">% prediction</span>
+    Xk_predicted=Fk*Xk_1; <span class="comment">% Prediction of state</span>
+    Pk_predicted=(Fk*Pk_1*Fk')+Qk_1; <span class="comment">% Prediction of covariance</span>
+
+    <span class="comment">% State transition model</span>
+    x0=x0+vx0*dt;
+    y0=y0+vy0*dt;
+    vx0=vx0; <span class="comment">% assuming velocity changes slowly</span>
+    vy0=vy0;
+
+    <span class="comment">% defining measurement equations</span>
+    syms <span class="string">x</span> <span class="string">y</span> <span class="string">vx</span> <span class="string">vy</span>
+    d10 = sqrt((-10-x)^2+(0-y)^2);
+    d20 = sqrt((0-x)^2+(-10-y)^2);
+    d30 = sqrt((10-x)^2+(0-y)^2);
+    d40 = sqrt((0-x)^2+(10-y)^2);
+
+    <span class="comment">% Design matrix H</span>
+    Hk = jacobian([d10,d20,d30,d40], [x, y, vx, vy]);
+    Hk = double(subs(Hk, [x, y, vx, vy], [Xk_predicted(1,1),Xk_predicted(2,1),Xk_predicted(3,1),Xk_predicted(4,1)]));
+    <span class="comment">%Hk = double(subs(Hk, [x, y, vx, vy], [x0,y0,vx0,vy0]));</span>
+
+    <span class="comment">% defininf f(X0)</span>
+    f_x0=[d10;d20;d30;d40];
+    f_x0 = double(subs(f_x0, [x, y], [x0,y0]));
+
+    <span class="comment">% Measurement model</span>
+    Zk_=Hk*Xk_predicted+f_x0-Hk*Xk_1;
+
+    <span class="comment">%kalman gain</span>
+    Kk=Pk_predicted*Hk'*inv(Hk*Pk_predicted*Hk'+Rk_1);
+
+    <span class="comment">% updating</span>
+    Xk=Xk_predicted+Kk*(Zk-Zk_); <span class="comment">% state vector</span>
+    Pk=(eye(4)-Kk*Hk)*Pk_predicted; <span class="comment">% error covariance</span>
+
+    <span class="comment">% updating variable</span>
+    Pk_1=Pk;
+    x0=Xk(1,1);
+    y0=Xk(2,1);
+    vx0=Xk(3,1);
+    vy0=Xk(4,1);
+
+    disp([<span class="string">'Coordinates of car at position'</span>, num2str(i)]);
+    disp(x0)
+    disp(y0)
+    <span class="comment">% Store the final coordinates in lists</span>
+    x_list = [x_list; x0];
+    y_list = [y_list; y0];
+
+    <span class="comment">% storing variables for plotting</span>
+    trace_P(i)=trace(Pk);
+<span class="keyword">end</span>
+
+<span class="comment">% Define control points</span>
+x_control = [-10, 0, 10, 0];
+y_control = [0, -10, 0, 10];
+
+<span class="comment">% Plot a graph between x and y</span>
+figure;
+hold <span class="string">on</span>;
+plot(x_list, y_list, <span class="string">'o'</span>, <span class="string">'DisplayName'</span>, <span class="string">'Final Coordinates'</span>);
+plot(x_control, y_control, <span class="string">'s'</span>, <span class="string">'DisplayName'</span>, <span class="string">'Control Points'</span>);
+plot(x_list, y_list, <span class="string">'-'</span>, <span class="string">'Color'</span>, <span class="string">'b'</span>, <span class="string">'DisplayName'</span>, <span class="string">'Trajectory of car'</span>)
+hold <span class="string">off</span>;
+xlabel(<span class="string">'x'</span>);
+ylabel(<span class="string">'y'</span>);
+title(<span class="string">'Trajectory of the Car'</span>);
+legend;
+xlim([-10, 10]); <span class="comment">% set x-axis limits to -10 and 10</span>
+ylim([-10, 10]); <span class="comment">% set y-axis limits to -10 and 10</span>
+
+<span class="comment">% Plotting Trace of Estimation Error Covariance</span>
+figure;
+dt = 0:20;
+plot(dt, trace_P, <span class="string">'m'</span>, <span class="string">'LineWidth'</span>, 2); <span class="comment">% Trace of estimation error covariance</span>
+xlabel(<span class="string">'Time (1 sec interval)'</span>);
+ylabel(<span class="string">'Trace of P'</span>);
+title(<span class="string">'Trace of Estimation Error Covariance (P) vs Time'</span>);
+grid <span class="string">on</span>;
+</pre><pre class="codeoutput">Coordinates of car at position1
+   -9.7646
+
+   -9.7646
+
+Coordinates of car at position2
+   -9.0049
+
+   -9.0049
+
+Coordinates of car at position3
+   -8.3301
+
+   -8.3301
+
+Coordinates of car at position4
+   -7.5089
+
+   -7.5089
+
+Coordinates of car at position5
+   -6.6380
+
+   -6.6380
+
+Coordinates of car at position6
+   -5.7326
+
+   -5.7326
+
+Coordinates of car at position7
+   -4.8055
+
+   -4.8055
+
+Coordinates of car at position8
+   -3.8631
+
+   -3.8631
+
+Coordinates of car at position9
+   -2.9116
+
+   -2.9116
+
+Coordinates of car at position10
+   -1.9581
+
+   -1.9581
+
+Coordinates of car at position11
+   -1.0029
+
+   -1.0029
+
+Coordinates of car at position12
+   -0.0464
+
+   -0.0464
+
+Coordinates of car at position13
+    0.9086
+
+    0.9086
+
+Coordinates of car at position14
+    1.8510
+
+    1.8660
+
+Coordinates of car at position15
+    2.8086
+
+    2.8198
+
+Coordinates of car at position16
+    3.7668
+
+    3.7752
+
+Coordinates of car at position17
+    4.7327
+
+    4.7390
+
+Coordinates of car at position18
+    5.7197
+
+    5.7093
+
+Coordinates of car at position19
+    6.7130
+
+    6.7040
+
+Coordinates of car at position20
+    7.7151
+
+    7.7071
+
+Coordinates of car at position21
+    8.7234
+
+    8.7161
+
+</pre><img vspace="5" hspace="5" src="kalman_filter_01.png" alt=""> <img vspace="5" hspace="5" src="kalman_filter_02.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% initializing state vector
+x0=-9.764;% simultaneous solving for two equations
+y0=-9.764;
+vx0=0; % asuming velocity to be zero at the start
+vy0=0;
+
+Lb1 = [9.72; 9.72; 22.08; 22.08];
+Lb2 = [8.77;8.77;20.74;20.74];
+Lb3 = [7.97;7.97;19.42;19.42];
+Lb4 = [7.34;7.34;18.10;18.10];
+Lb5 = [6.93;6.93;16.81;16.81];
+Lb6 = [6.79;6.79;15.53;15.53];
+Lb7 = [6.93;6.93;14.28;14.28];
+Lb8 = [7.34;7.34;13.06;13.06];
+Lb9 = [7.97;7.97;11.88;11.88];
+Lb10 = [8.77;8.77;10.76;10.76];
+Lb11 = [9.72;9.72;9.72;9.72];
+Lb12 = [10.76;10.76;8.77;8.77];
+Lb13 = [11.88;11.88;7.97;7.97];
+Lb14 = [13.06;13.06;7.43;7.34];
+Lb15 = [14.28;14.28;6.93;6.93];
+Lb16 = [15.53;15.53;6.79;6.79];
+Lb17 = [16.81;16.81;6.93;6.93];
+Lb18 = [18.10;18.10;7.34;7.43];
+Lb19 = [19.42;19.42;7.97;7.97];
+Lb20 = [20.74;20.74;8.77;8.77];
+Lb21 = [22.08;22.08;9.72;9.72];
+
+% Define observation matrices in a cell array
+Lb_cell = {Lb1, Lb2, Lb3, Lb4, Lb5, Lb6, Lb7, Lb8, Lb9, Lb10, Lb11, Lb12, Lb13, Lb14, Lb15, Lb16, Lb17, Lb18, Lb19, Lb20, Lb21};
+
+% Initializing covariance matrices
+Pk_1 = diag([1,1,1,1]); % Covariance of the process noise
+Qk_1 = diag([0.001,0.001,0.001,0.001]); % Covariance of the state estimate
+Rk_1 = diag([1, 1, 1, 1]); % Covariance of the observation noise
+
+% Initialize lists to store final coordinates
+x_list = [];
+y_list = [];
+trace_P=[];
+
+for i=1:21
+
+    % define state vector
+    Xk_1=[x0;y0;vx0;vy0];
+
+    % define Measurement model
+    Zk=Lb_cell{i};
+
+    % define time step
+    dt=1;
+
+    % define Fk matrix
+    Fk=[1 0 dt 0;
+        0 1 0 dt;
+        0 0 1 0;
+        0 0 0 1];
+
+    % Kalman filter
+    % prediction
+    Xk_predicted=Fk*Xk_1; % Prediction of state
+    Pk_predicted=(Fk*Pk_1*Fk')+Qk_1; % Prediction of covariance
+
+    % State transition model
+    x0=x0+vx0*dt;
+    y0=y0+vy0*dt;
+    vx0=vx0; % assuming velocity changes slowly
+    vy0=vy0;
+    
+    % defining measurement equations 
+    syms x y vx vy
+    d10 = sqrt((-10-x)^2+(0-y)^2);
+    d20 = sqrt((0-x)^2+(-10-y)^2);
+    d30 = sqrt((10-x)^2+(0-y)^2);
+    d40 = sqrt((0-x)^2+(10-y)^2);
+
+    % Design matrix H
+    Hk = jacobian([d10,d20,d30,d40], [x, y, vx, vy]);
+    Hk = double(subs(Hk, [x, y, vx, vy], [Xk_predicted(1,1),Xk_predicted(2,1),Xk_predicted(3,1),Xk_predicted(4,1)]));
+    %Hk = double(subs(Hk, [x, y, vx, vy], [x0,y0,vx0,vy0]));
+
+    % defininf f(X0)
+    f_x0=[d10;d20;d30;d40];
+    f_x0 = double(subs(f_x0, [x, y], [x0,y0]));
+
+    % Measurement model
+    Zk_=Hk*Xk_predicted+f_x0-Hk*Xk_1;
+
+    %kalman gain
+    Kk=Pk_predicted*Hk'*inv(Hk*Pk_predicted*Hk'+Rk_1);
+
+    % updating
+    Xk=Xk_predicted+Kk*(Zk-Zk_); % state vector
+    Pk=(eye(4)-Kk*Hk)*Pk_predicted; % error covariance
+
+    % updating variable
+    Pk_1=Pk;
+    x0=Xk(1,1);
+    y0=Xk(2,1);
+    vx0=Xk(3,1);
+    vy0=Xk(4,1);
+
+    disp(['Coordinates of car at position', num2str(i)]);
+    disp(x0)
+    disp(y0)
+    % Store the final coordinates in lists
+    x_list = [x_list; x0];
+    y_list = [y_list; y0];
+
+    % storing variables for plotting
+    trace_P(i)=trace(Pk);
+end
+
+% Define control points 
+x_control = [-10, 0, 10, 0];
+y_control = [0, -10, 0, 10];
+
+% Plot a graph between x and y
+figure;
+hold on;
+plot(x_list, y_list, 'o', 'DisplayName', 'Final Coordinates');
+plot(x_control, y_control, 's', 'DisplayName', 'Control Points');
+plot(x_list, y_list, '-', 'Color', 'b', 'DisplayName', 'Trajectory of car')
+hold off;
+xlabel('x');
+ylabel('y');
+title('Trajectory of the Car');
+legend;
+xlim([-10, 10]); % set x-axis limits to -10 and 10
+ylim([-10, 10]); % set y-axis limits to -10 and 10
+
+% Plotting Trace of Estimation Error Covariance 
+figure;
+dt = 0:20;
+plot(dt, trace_P, 'm', 'LineWidth', 2); % Trace of estimation error covariance
+xlabel('Time (1 sec interval)');
+ylabel('Trace of P');
+title('Trace of Estimation Error Covariance (P) vs Time');
+grid on;
+
+##### SOURCE END #####
+--></body></html>
